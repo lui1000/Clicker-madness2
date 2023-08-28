@@ -1,0 +1,158 @@
+
+    --~Config~--
+    getgenv().autotap = true;
+    getgenv().autorebirth = true;
+    getgenv().buyegg = true;
+    getgenv().Selectedworld = true;
+
+    --~Vars~--
+    local plyr = game.Players.LocalPlayer
+    local remotepath = game:GetService("ReplicatedStorage").Aero.AeroRemoteServices
+    local gamepasses = plyr.Gamepasses
+  
+    --~Functions~--
+    function dotap()
+        task.spawn(function()
+            while autotap == true do
+            local args = {[1] = math.huge}
+            remotepath.ClickService.Click:FireServer(unpack(args))
+                task.wait()
+            end
+        end)
+    end
+
+    function autorebirth(rebirthamount)
+        task.spawn(function()
+            while getgenv().autorebirth == true do
+                remotepath.RebirthService.BuyRebirths:FireServer(rebirthamount)
+                task.wait() 
+            end 
+        end)
+    end
+
+    function GetGamepasses()
+        for i, gamepass in pairs(gamepasses:GetChildren()) do
+            if gamepass:IsA("BoolValue") then
+                gamepass.Value = true
+            end
+        end
+    end
+    GetGamepasses()
+
+    function buyegg(eggtype)
+        remotepath.EggService.Purchase:FireServer(eggtype)
+            
+    end
+        
+        function teleportTO(placeCFrame)  
+            plyr.Character:FindFirstChild("HumanoidRootPart").CFrame = placeCFrame
+        end
+
+        function teleportworld(world)
+            if workspace.Worlds:FindFirstChild(world) then
+                teleportTO(workspace.Worlds[world].Teleport.CFrame)
+                end
+            end
+
+    --~Gui~--
+    local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+    local Window = OrionLib:MakeWindow({Name = "[100X] CLICKER MADNESS! 😈 - lui100", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+    
+    local FarmingTab1 = Window:MakeTab({
+        Name = "Farming",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+    })
+
+    FarmingTab1:AddToggle({
+        Name = "AutoTap",
+        Default = false,
+        Callback = function(Value)
+            getgenv().autotap = Value
+            dotap()
+        end    
+    })
+
+    FarmingTab1:AddTextbox({
+        Name = "Rebirth amount",
+        Default = "",
+        TextDisappear = false,
+        Callback = function(Value)
+            getgenv().rebirthamount = Value
+        end	  
+    })
+
+    FarmingTab1:AddToggle({
+        Name = "AutoRebirth",
+        Default = false,
+        Callback = function(Value)
+            getgenv().autorebirth = Value
+            autorebirth(tostring(getgenv().rebirthamount))
+        end    
+    })
+
+        
+    local Worldlist = {}
+    for i,islands in pairs(workspace.Worlds:GetChildren()) do
+        print(islands.Name)
+        table.insert(Worldlist,islands.Name)
+    end  
+
+    local TeleportTab2 = Window:MakeTab({
+        Name = "Teleport",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+    })    
+    
+    local Selectedworld;
+
+
+    TeleportTab2:AddDropdown({
+	    Name = "islands",
+	    Default = "Islands",
+	    Options = Worldlist,
+	    Callback = function(Value)
+		    getgenv().Selectedworld = Value
+	    end    
+    })
+
+    TeleportTab2:AddButton({ 
+        Name = "teleport!",
+        Callback = function(Value)
+            if getgenv().Selectedworld then
+            teleportworld(getgenv().Selectedworld)
+        end 
+    end
+})
+    local selectedegg
+
+    local EggTab3 = Window:MakeTab({
+        Name = "egg",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+})
+
+    local egglist = {}
+        for i,egg in pairs(workspace.EggCapsules:GetChildren()) do
+            print(egg.EggID.Value)
+            table.insert(egglist,egg.EggID.Value)
+        end
+
+    EggTab3:AddDropdown({
+	    Name = "egg",
+	    Default = "egg",
+	    Options = egglist,
+	    Callback = function(Value)
+		    getgenv().selectedegg = Value
+	    end    
+    })
+
+    EggTab3:AddButton({ 
+        Name = "BuyEgg!",
+        Callback = function(Value)
+            if getgenv().selectedegg then
+            buyegg(getgenv().selectedegg)
+        end 
+    end
+})
